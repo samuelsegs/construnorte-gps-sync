@@ -1,0 +1,9 @@
+{
+  "name": "construnorte-gps-sync",
+  "version": "1.0.0",
+  "description": "Sync GPS positions from Ovisión to Firebase Firestore",
+  "main": "sync.cjs",
+  "dependencies": {
+    "firebase-admin": "^12.0.0"
+  }
+}
