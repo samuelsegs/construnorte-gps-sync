@@ -131,7 +131,30 @@ async function main() {
     lastSyncMs: Date.now(),
   }, { merge: true })
 
-  console.log(`Sync OK — ${positions.length} posiciones guardadas.`)
+  // ── Historial GPS: agrega cada posición al documento del día ─────────────
+  const dateKey = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Mexico_City' })
+  let hBatch = db.batch(), hOps = 0
+  for (const pos of positions) {
+    const ref = db.collection('gpsHistory').doc(`${pos.placa}_${dateKey}`)
+    hBatch.set(ref, {
+      placa: pos.placa,
+      date:  dateKey,
+      positions: admin.firestore.FieldValue.arrayUnion({
+        lat:        pos.lat,
+        lon:        pos.lon,
+        vel:        pos.vel,
+        estado:     pos.estado,
+        ignicion:   pos.ignicion,
+        heading:    pos.heading    || '',
+        dateTimeGPS: pos.dateTimeGPS || '',
+        updatedAt:  pos.updatedAt,
+      }),
+    }, { merge: true })
+    if (++hOps === 490) { await hBatch.commit(); hBatch = db.batch(); hOps = 0 }
+  }
+  if (hOps > 0) await hBatch.commit()
+
+  console.log(`Sync OK — ${positions.length} posiciones. Historial: ${dateKey}.`)
   process.exit(0)
 }
 
