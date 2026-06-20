@@ -25,3 +25,21 @@ jobs:
           OVIS_LOGIN: ${{ secrets.OVIS_LOGIN }}
           OVIS_PASSWORD: ${{ secrets.OVIS_PASSWORD }}
           FIREBASE_SERVICE_ACCOUNT_B64: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_B64 }}
+
+      - name: Notificar fallo por email
+        if: failure()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: "⚠️ GPS Sync falló — Construnorte"
+          to: coordinacion.trafico@construnorte.mx
+          from: GPS Sync Construnorte
+          body: |
+            El sincronizador GPS falló en su última ejecución.
+
+            Repositorio: ${{ github.repository }}
+            Fecha: ${{ github.event.head_commit.timestamp }}
+            Ver logs: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
